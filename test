@@ -1,0 +1,76 @@
+def minimax_alpha_beta(self, temp_board, all_moves_and_pieces, depth, color, alpha, beta):
+
+    if depth == 0:
+        eval = self.minmax_evaluate_board(temp_board)
+        return eval
+
+    if color == 'white':
+        self.best_move = None
+        self.best_piece = None
+        max_eval = -1000
+        for piece, moves in all_moves_and_pieces:
+            for move in moves:
+
+                temp_board.move(piece, move, TURN=0, rules_flag=0, monitor=None)
+
+                color = 'black' if color == 'white' else 'white'
+                all_moves_and_pieces = self.board.get_all_valid_moves_3(color, pawn_special_flag=None)
+                eval = self.minimax_alpha_beta(temp_board, all_moves_and_pieces, (depth - 1), color, alpha, beta)
+
+                if eval > max_eval:
+                    max_eval = eval
+                    self.best_move = move
+                    self.best_piece = piece
+
+                alpha = max(alpha, eval)
+
+                if beta <= alpha:
+                    break
+        return max_eval
+    
+    elif color == 'black':
+        self.best_move = None
+        self.best_piece = None
+        min_eval = 1000
+        for piece, moves in all_moves_and_pieces:
+            for move in moves:
+
+                temp_board.move(piece, move, TURN=0, rules_flag=0, monitor=None)
+
+                color = 'black' if color == 'white' else 'white'
+                all_moves_and_pieces = self.board.get_all_valid_moves_3(color, pawn_special_flag=None)
+                eval = self.minimax_alpha_beta(temp_board, all_moves_and_pieces, (depth - 1), color, alpha, beta)
+
+                if eval < min_eval:
+                    min_eval = eval
+                    self.best_move = move
+                    self.best_piece = piece
+
+                beta = min(beta, eval)
+
+                if beta <= alpha:
+                    break
+        return min_eval
+		
+=================================================================================================================
+
+Implementation:
+
+def main_engine(self, TURN, White_Points, Black_Points):
+
+    all_moves_and_pieces = self.board.get_all_valid_moves_3(self.next_player, pawn_special_flag)
+
+    if all_moves_and_pieces:
+
+        depth = 2
+        color = self.next_player
+        temp_board = copy.deepcopy(self.board)
+        
+        best_eval = self.minimax_alpha_beta(temp_board, all_moves_and_pieces, depth, color, alpha=-1000, beta=1000)
+        best_move = self.best_move
+        best_piece = self.best_piece
+
+        self.board.move(best_piece, best_move, TURN, rules_flag=0, monitor=None)
+        self.store_played_moves(best_move)
+
+    return TURN, White_Points, Black_Points
