@@ -1,56 +1,63 @@
 def minimax_alpha_beta(self, temp_board, all_moves_and_pieces, depth, color, alpha, beta):
 
-    if depth == 0:
-        eval = self.minmax_evaluate_board(temp_board)
-        return eval
+        if depth == 0:
+            eval = self.minmax_evaluate_board(temp_board)
+            return eval
 
-    if color == 'white':
-        self.best_move = None
-        self.best_piece = None
-        max_eval = -1000
-        for piece, moves in all_moves_and_pieces:
-            for move in moves:
+        if color == 'white':
+            self.best_move = None
+            self.best_piece = None
+            max_eval = -1000
+            for piece, moves in all_moves_and_pieces:
+                for move in moves:
 
-                temp_board.move(piece, move, TURN=0, rules_flag=0, monitor=None)
+                    temp_board.move(piece, move, TURN=0, rules_flag=0, monitor=None)
+                    self.store_played_moves(move)
 
-                color = 'black' if color == 'white' else 'white'
-                all_moves_and_pieces = temp_board.get_all_valid_moves(color, pawn_special_flag=None)
-                eval = self.minimax_alpha_beta(temp_board, all_moves_and_pieces, (depth - 1), color, alpha, beta)
+                    color = 'black' if color == 'white' else 'white'
+                    all_moves_and_pieces = temp_board.get_all_valid_moves_3(color, pawn_special_flag=None)
+                    eval = self.minimax_alpha_beta(temp_board, all_moves_and_pieces, (depth - 1), color, alpha, beta)
 
-                if eval > max_eval:
-                    max_eval = eval
-                    self.best_move = move
-                    self.best_piece = piece
+                    self.temp_board_undo(temp_board, color, TAKE_BACKS=0, TURN=0, pawn_special_flag=0, prom_prevent_flag=False)
 
-                alpha = max(alpha, eval)
+                    if eval > max_eval:
+                        max_eval = eval
+                        self.best_move = move
+                        self.best_piece = piece
 
-                if beta <= alpha:
-                    break
-        return max_eval
-    
-    elif color == 'black':
-        self.best_move = None
-        self.best_piece = None
-        min_eval = 1000
-        for piece, moves in all_moves_and_pieces:
-            for move in moves:
+                    alpha = max(alpha, eval)
 
-                temp_board.move(piece, move, TURN=0, rules_flag=0, monitor=None)
+                    if beta <= alpha:
+                        break
+            return max_eval
+        
+        elif color == 'black':
+            self.best_move = None
+            self.best_piece = None
+            min_eval = 1000
+            for piece, moves in all_moves_and_pieces:
+                for move in moves:
 
-                color = 'black' if color == 'white' else 'white'
-                all_moves_and_pieces = temp_board.get_all_valid_moves(color, pawn_special_flag=None)
-                eval = self.minimax_alpha_beta(temp_board, all_moves_and_pieces, (depth - 1), color, alpha, beta)
+                    temp_board.move(piece, move, TURN=0, rules_flag=0, monitor=None)
+                    self.store_played_moves(move)
+                    print(piece,'at',piece.row, piece.col, 'made the', move)
 
-                if eval < min_eval:
-                    min_eval = eval
-                    self.best_move = move
-                    self.best_piece = piece
+                    color = 'black' if color == 'white' else 'white'
+                    all_moves_and_pieces = temp_board.get_all_valid_moves_3(color, pawn_special_flag=None)
+                    eval = self.minimax_alpha_beta(temp_board, all_moves_and_pieces, (depth - 1), color, alpha, beta)
 
-                beta = min(beta, eval)
+                    self.temp_board_undo(temp_board, color, TAKE_BACKS=0, TURN=0, pawn_special_flag=0, prom_prevent_flag=False)
 
-                if beta <= alpha:
-                    break
-        return min_eval
+                    if eval < min_eval:
+                        min_eval = eval
+                        self.best_move = move
+                        self.best_piece = piece
+
+                    beta = min(beta, eval)
+
+                    if beta <= alpha:
+                        break
+            return min_eval
 		
 =================================================================================================================
 
