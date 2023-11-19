@@ -1,63 +1,66 @@
-def minimax_alpha_beta(self, temp_board, all_moves_and_pieces, depth, color, alpha, beta):
+def minimax_alpha_beta(self, maximizing_player, temp_board, depth, color, alpha, beta):
 
-        if depth == 0:
-            eval = self.minmax_evaluate_board(temp_board)
-            return eval
+    all_moves_and_pieces = self.get_all_valid_moves_game(color, temp_board, pawn_special_flag=None)
 
-        if color == 'white':
-            self.best_move = None
-            self.best_piece = None
-            max_eval = -1000
-            for piece, moves in all_moves_and_pieces:
-                for move in moves:
+    if depth == 0:
+        evaluation = self.minmax_evaluate_board(temp_board)
+        return evaluation, color
 
-                    temp_board.move(piece, move, TURN=0, rules_flag=0, monitor=None)
-                    self.store_played_moves(move)
+    if color == 'white':
+        max_eval = -1000
+        for white_piece, white_moves in all_moves_and_pieces:
+            for white_move in white_moves:
 
-                    color = 'black' if color == 'white' else 'white'
-                    all_moves_and_pieces = temp_board.get_all_valid_moves_3(color, pawn_special_flag=None)
-                    eval = self.minimax_alpha_beta(temp_board, all_moves_and_pieces, (depth - 1), color, alpha, beta)
+                temp_board_white = copy.deepcopy(temp_board)
+                temp_board.move(white_piece, white_move, TURN=0, rules_flag=0, monitor=None)
+                color = 'black'
+                evaluation, color = self.minimax_alpha_beta(maximizing_player, temp_board, (depth - 1), color, alpha, beta)
 
-                    self.temp_board_undo(temp_board, color, TAKE_BACKS=0, TURN=0, pawn_special_flag=0, prom_prevent_flag=False)
+                # Return from [2] - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+                temp_board = copy.deepcopy(temp_board_white)
 
-                    if eval > max_eval:
-                        max_eval = eval
-                        self.best_move = move
-                        self.best_piece = piece
+                if evaluation > max_eval:
+                    max_eval = evaluation
+                    if maximizing_player == 'white':
+                        self.best_move = white_move
+                        self.best_piece = white_piece
 
-                    alpha = max(alpha, eval)
+                alpha = max(alpha, evaluation)
+                if beta <= alpha:
+                    break
 
-                    if beta <= alpha:
-                        break
-            return max_eval
+        temp_board = copy.deepcopy(self.board)
+
+        # --- END OF METHOD --- / 1
+        return max_eval, color
+    
+    elif color == 'black':
+        min_eval = 1000
+        for black_piece, black_moves in all_moves_and_pieces:
+            for black_move in black_moves:
+
+                temp_board_black = copy.deepcopy(temp_board)
+                temp_board.move(black_piece, black_move, TURN=0, rules_flag=0, monitor=None)
+                color = 'white'
+                evaluation, color = self.minimax_alpha_beta(maximizing_player, temp_board, (depth - 1), color, alpha, beta)
+
+                # Return from [1] - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                temp_board = copy.deepcopy(temp_board_black)
+
+                if evaluation < min_eval:
+                    min_eval = evaluation
+                    if maximizing_player == 'black':
+                        self.best_move = black_move
+                        self.best_piece = black_piece
+
+                beta = min(beta, evaluation)
+                if beta <= alpha:
+                    break
+
+        temp_board = copy.deepcopy(self.board)
         
-        elif color == 'black':
-            self.best_move = None
-            self.best_piece = None
-            min_eval = 1000
-            for piece, moves in all_moves_and_pieces:
-                for move in moves:
-
-                    temp_board.move(piece, move, TURN=0, rules_flag=0, monitor=None)
-                    self.store_played_moves(move)
-                    print(piece,'at',piece.row, piece.col, 'made the', move)
-
-                    color = 'black' if color == 'white' else 'white'
-                    all_moves_and_pieces = temp_board.get_all_valid_moves_3(color, pawn_special_flag=None)
-                    eval = self.minimax_alpha_beta(temp_board, all_moves_and_pieces, (depth - 1), color, alpha, beta)
-
-                    self.temp_board_undo(temp_board, color, TAKE_BACKS=0, TURN=0, pawn_special_flag=0, prom_prevent_flag=False)
-
-                    if eval < min_eval:
-                        min_eval = eval
-                        self.best_move = move
-                        self.best_piece = piece
-
-                    beta = min(beta, eval)
-
-                    if beta <= alpha:
-                        break
-            return min_eval
+        # --- END OF METHOD --- / 2
+        return min_eval, color
 		
 =================================================================================================================
 
